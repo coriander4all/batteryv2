@@ -10,7 +10,7 @@ from src.trainer import train, eval
 from hyperparams import *
 
 learning_rate = 0.001
-num_epochs = 100
+num_epochs = 30
 
 #paths
 train_csv = "data/processed2/train.csv"

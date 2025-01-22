@@ -3,6 +3,7 @@ import os
 import time
 from tqdm import tqdm
 import torch.nn.functional as F
+import matplotlib.pyplot as plt
 
 
 def train(
@@ -15,10 +16,14 @@ def train(
     save_path="experiments",
 ):
     best_val_loss = float("inf")
+    train_losses = []
+    val_losses = []
+    
     if not os.path.exists(save_path):
         os.makedirs(save_path)
     with open(save_path + "/metrics.csv", "w") as file:
         file.write("epoch,train_loss,val_loss,duration\n")
+        
     for epoch in range(num_epochs):
         start_time = time.time()
         model.train()
@@ -37,6 +42,9 @@ def train(
 
         train_loss /= len(train_loader)
         val_loss = validate(model, val_loader, criterion)
+        
+        train_losses.append(train_loss)
+        val_losses.append(val_loss)
 
         end_time = time.time()
         duration = end_time - start_time
@@ -50,6 +58,18 @@ def train(
         # log metrics
         with open(save_path + "/metrics.csv", "a") as file:
             file.write(f"{epoch + 1},{train_loss},{val_loss},{duration}\n")
+
+        #plot
+        plt.figure(figsize=(10, 6))
+        plt.plot(train_losses, label='Train Loss')
+        plt.plot(val_losses, label='Validation Loss')
+        plt.xlabel('Epoch')
+        plt.ylabel('Loss')
+        plt.title('Training and Validation Loss')
+        plt.legend()
+        plt.grid(True)
+        plt.savefig(f"{save_path}/loss_curve.png")
+        plt.close()
 
         # save best model
         if val_loss < best_val_loss:
